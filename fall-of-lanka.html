@@ -57,6 +57,11 @@
       ul {
           padding-left: 20px;
       }
+      /* ... (keep all existing styles) ... */
+      .card-counts {
+          margin-top: 20px;
+          font-size: 16px;
+      }
     </style>
   </head>
   <body>
@@ -67,6 +72,11 @@
       <option value="2">Round 2</option>
       <option value="3">Round 3</option>
     </select>
+
+    <div class="card-counts">
+      <p>Loot Cards Left: <span id="lootCount"></span></p>
+      <p>Danger Cards Left: <span id="dangerCount"></span></p>
+    </div>
 
     <h2>Current Card</h2>
     <div id="card" class="card" onclick="drawCard()"></div>
@@ -79,6 +89,8 @@
     <script>
       let currentRound = 1;
       let currentDeck = [];
+      let lootCount = 0;
+      let dangerCount = 0;
 
       const round1Deck = [
         ...Array(15).fill().map((_, i) => ({ type: 'treasure', value: [1, 2, 3, 4, 5, 5, 7, 7, 9, 11, 11, 13, 14, 15, 17][i], name: 'Gold Coins' })),
@@ -101,6 +113,8 @@
 
       const cardDiv = document.getElementById('card');
       const previousCardslist = document.getElementById('previous-cards-list');
+      const lootCountSpan = document.getElementById('lootCount');
+      const dangerCountSpan = document.getElementById('dangerCount');
 
       function shuffleDeck(deck) {
         for (let i = deck.length - 1; i > 0; i--) {
@@ -130,6 +144,14 @@
         cardDiv.textContent = 'Click to draw';
         cardDiv.classList.remove('treasure', 'danger');
         previousCardslist.innerHTML = '';
+        updateCardCounts();
+      }
+
+      function updateCardCounts() {
+        lootCount = currentDeck.filter(card => card.type === 'treasure').length;
+        dangerCount = currentDeck.filter(card => card.type === 'danger').length;
+        lootCountSpan.textContent = lootCount;
+        dangerCountSpan.textContent = dangerCount;
       }
 
       function drawCard() {
@@ -147,6 +169,8 @@
         const listItem = document.createElement('li');
         listItem.textContent = cardDiv.textContent;
         previousCardslist.appendChild(listItem);
+
+        updateCardCounts();
       }
 
       // Initialize the game
