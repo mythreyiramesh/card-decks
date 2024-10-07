@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fall of Lanka Card Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body {
+          font-family: Arial, sans-serif;
+          max-width: 100%;
+          margin: 0 auto;
+          padding: 20px;
+          text-align: center;
+          box-sizing: border-box;
+      }
+
+      select {
+          font-size: 16px;
+          margin-bottom: 20px;
+          padding: 5px;
+      }
+
+      .card {
+          border: 1px solid black;
+          border-radius: 5px;
+          width: 80%;
+          max-width: 300px;
+          height: 200px;
+          margin: 20px auto;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 18px;
+          cursor: pointer;
+          padding: 10px;
+          box-sizing: border-box;
+          word-wrap: break-word;
+      }
+
+      .danger {
+          background-color: #f8d7da;
+          color: #721c24;
+      }
+
+      .treasure {
+          background-color: #d4edda;
+          color: #155724;
+      }
+
+      .previous-cards {
+          margin-top: 20px;
+          text-align: left;
+          max-width: 300px;
+          margin-left: auto;
+          margin-right: auto;
+      }
+
+      ul {
+          padding-left: 20px;
+      }
+      /* ... (keep all existing styles) ... */
+      .card-counts {
+          margin-top: 20px;
+          font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Fall of Lanka</h1>
+    <h2>Select Round</h2>
+    <select id="roundSelector" onchange="changeRound()">
+      <option value="1">Round 1</option>
+      <option value="2">Round 2</option>
+      <option value="3">Round 3</option>
+    </select>
+
+    <div class="card-counts">
+      <p>Loot Cards Left: <span id="lootCount"></span></p>
+      <p>Danger Cards Left: <span id="dangerCount"></span></p>
+    </div>
+
+    <h2>Current Card</h2>
+    <div id="card" class="card" onclick="drawCard()"></div>
+
+    <div class="previous-cards">
+      <h3>Previous Cards:</h3>
+      <ul id="previous-cards-list"></ul>
+    </div>
+
+    <script>
+      let currentRound = 1;
+      let currentDeck = [];
+      let lootCount = 0;
+      let dangerCount = 0;
+
+      const round1Deck = [
+          ...Array(15).fill().map((_, i) => ({ type: 'treasure', value: [1, 3, 6, 9, 11, 11, 12, 15, 15, 21, 21, 21, 25, 25, 30][i], name: 'Gold Coins' })),
+        ...Array(2).fill({ type: 'danger', value: 'Hanuman\'s Flames' }),
+        ...Array(2).fill({ type: 'danger', value: 'Vanara Army Attack' }),
+        ...Array(2).fill({ type: 'danger', value: 'Collapsing Walls' })
+      ];
+
+      const round2Deck = [
+        ...round1Deck,
+          ...Array(10).fill().map((_, i) => ({ type: 'treasure', value: [1, 3, 9, 9, 10, 12, 13, 14, 15, 20][i], name: 'Jeweled Weapons' })),
+        ...Array(2).fill({ type: 'danger', value: 'Vibhishana\'s Trap' })
+      ];
+
+      const round3Deck = [
+        ...round2Deck,
+        ...Array(5).fill().map((_, i) => ({ type: 'treasure', value: [1, 4, 6, 8, 10][i], name: 'Ancient Manuscripts' })),
+        ...Array(2).fill({ type: 'danger', value: 'Rama\'s Arrows' })
+      ];
+
+      const cardDiv = document.getElementById('card');
+      const previousCardslist = document.getElementById('previous-cards-list');
+      const lootCountSpan = document.getElementById('lootCount');
+      const dangerCountSpan = document.getElementById('dangerCount');
+
+      function shuffleDeck(deck) {
+        for (let i = deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+      }
+
+      function changeRound() {
+        currentRound = parseInt(document.getElementById('roundSelector').value);
+        resetDeck();
+      }
+
+      function resetDeck() {
+        switch (currentRound) {
+        case 1:
+          currentDeck = [...round1Deck];
+          break;
+        case 2:
+          currentDeck = [...round2Deck];
+          break;
+        case 3:
+          currentDeck = [...round3Deck];
+          break;
+        }
+        shuffleDeck(currentDeck);
+        cardDiv.textContent = 'Click to draw';
+        cardDiv.classList.remove('treasure', 'danger');
+        previousCardslist.innerHTML = '';
+        updateCardCounts();
+      }
+
+      function updateCardCounts() {
+        lootCount = currentDeck.filter(card => card.type === 'treasure').length;
+        dangerCount = currentDeck.filter(card => card.type === 'danger').length;
+        lootCountSpan.textContent = lootCount;
+        dangerCountSpan.textContent = dangerCount;
+      }
+
+      function drawCard() {
+        if (currentDeck.length === 0) {
+          cardDiv.textContent = 'No more cards!';
+          cardDiv.classList.remove('treasure', 'danger');
+          return;
+        }
+
+        const card = currentDeck.pop();
+        cardDiv.textContent = card.type === 'treasure' ? `${card.name}: ${card.value}` : card.value;
+        cardDiv.classList.remove('treasure', 'danger');
+        cardDiv.classList.add(card.type);
+
+        const listItem = document.createElement('li');
+        listItem.textContent = cardDiv.textContent;
+        previousCardslist.appendChild(listItem);
+
+        updateCardCounts();
+      }
+
+      // Initialize the game
+      resetDeck();
+    </script>
+  </body>
+</html>
